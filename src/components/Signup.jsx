@@ -1,31 +1,30 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { login as authLogin } from "../store/authSlice";
-import { Button, Input, Logo } from "./index";
-
-import { useDispatch } from "react-redux";
 import authService from "../appwrite/auth";
+import { Link, useNavigate } from "react-router-dom";
+import { login } from "../store/authSlice";
+import { Button, Input, Logo } from "./index";
+import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 
-function Login() {
+function Signup() {
   const navigate = useNavigate();
+  const [error, setError] = useState("");
   const dispatch = useDispatch();
   const { register, handleSubmit } = useForm();
-  const [error, setError] = useState("");
 
-  const login = async (data) => {
-    setError("");
+  const create = async (data) => {
     try {
-      const session = await authService.login(data);
-      if (session) {
+      const userData = await authService.createAccount(data);
+      if (userData) {
         const userData = await authService.getCurrentUser();
-        if (userData) dispatch(authLogin(userData));
+        if (userData) dispatch(login(userData));
         navigate("/");
       }
     } catch (error) {
       setError(error.message);
     }
   };
+
   return (
     <div className="flex w-full justify-center">
       <div className="w-full m-auto bg-gray-200">
@@ -34,17 +33,24 @@ function Login() {
             <Logo width="100%" />
           </span>
         </div>
-        <h2 className="text-center">sign in to your account</h2>
+        <h2 className="text-center">sign up to your account</h2>
         <p className="mt-2 text-center text-base">
-          {`Don't have an account? `}
-          <Link to="/signup" className="font-medium">
+          Already have an account?
+          <Link to="/login" className="font-medium">
             Sign Up
           </Link>
         </p>
-        {error && <p className="text-red-500 text-center">{error}</p>}
+        {error && <p>{error}</p>}
 
-        <form onSubmit={handleSubmit(login)} className="mt-8">
-          <div className="space-y-5">
+        <form onSubmit={handleSubmit(create)}>
+          <div>
+            <Input
+              label="Full Name: "
+              placeholder="Enter full name"
+              {...register("name", {
+                required: true,
+              })}
+            />
             <Input
               label="Email: "
               placeholder="Enter your email"
@@ -59,15 +65,14 @@ function Login() {
               })}
             />
             <Input
-              label="Password"
-              type="password"
-              placeholder="password"
+              label="Password: "
+              placeholder="Enter your password"
               {...register("password", {
                 required: true,
               })}
             />
-            <Button type="submit" className="w-full rounded-lg">
-              Sign In
+            <Button type="submit" className="w-full">
+              Create Account
             </Button>
           </div>
         </form>
@@ -76,4 +81,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Signup;
