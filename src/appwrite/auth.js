@@ -1,5 +1,4 @@
 import config from "../config/config";
-
 import { Client, Account, ID } from "appwrite";
 
 export class AuthService {
@@ -10,7 +9,6 @@ export class AuthService {
     this.client
       .setEndpoint(config.appwriteUrl)
       .setProject(config.appwriteProjectId);
-
     this.account = new Account(this.client);
   }
 
@@ -23,7 +21,7 @@ export class AuthService {
         name
       );
       if (userAccount) {
-        //log in that user
+        // call another method
         return this.login({ email, password });
       } else {
         return userAccount;
@@ -35,17 +33,19 @@ export class AuthService {
 
   async login({ email, password }) {
     try {
-      return this.account.createEmailSession(email, password);
+      return await this.account.createEmailSession(email, password);
     } catch (error) {
       throw error;
     }
   }
+
   async getCurrentUser() {
     try {
       return await this.account.get();
     } catch (error) {
-      console.log(error);
+      console.log("Appwrite serive :: getCurrentUser :: error", error);
     }
+
     return null;
   }
 
@@ -53,7 +53,7 @@ export class AuthService {
     try {
       await this.account.deleteSessions();
     } catch (error) {
-      return error;
+      console.log("Appwrite serive :: logout :: error", error);
     }
   }
 }
